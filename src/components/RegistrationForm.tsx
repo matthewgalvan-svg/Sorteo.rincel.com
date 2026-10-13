@@ -1,9 +1,10 @@
 import { useRef, useState, type FormEvent } from 'react'
-import { IS_DEMO, LINKS } from '../config'
+import { IS_DEMO, LINKS, TURNSTILE_SITE_KEY } from '../config'
 import { DEMO_PHONES, DUPLICATE_MESSAGE, submitRegistration } from '../lib/register'
 import { normalizeName, validateRegistration, type FieldErrors, type RegistrationInput } from '../lib/validation'
 import { Button } from './Button'
 import { CheckboxField, TextField } from './FormFields'
+import { Turnstile, type TurnstileHandle } from './Turnstile'
 
 const linkClass = 'font-extrabold text-rincel-blue underline underline-offset-2 hover:text-rincel-purple'
 
@@ -22,6 +23,11 @@ export function RegistrationForm({ onSuccess }: { onSuccess: () => void }) {
   const [notice, setNotice] = useState<Notice>(null)
   const inFlight = useRef(false)
   const honeypot = useRef<HTMLInputElement>(null)
+  const startedAt = useRef(performance.now())
+  const turnstile = useRef<TurnstileHandle>(null)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const [turnstileFailed, setTurnstileFailed] = useState(false)
+  const needsTurnstile = !IS_DEMO
 
   function update<K extends keyof RegistrationInput>(key: K, value: RegistrationInput[K]) {
     const next = { ...values, [key]: value }
@@ -48,17 +54,41 @@ export function RegistrationForm({ onSuccess }: { onSuccess: () => void }) {
       return
     }
 
-    // Campo trampa: los bots suelen llenarlo; las personas no lo ven.
-    if (honeypot.current?.value) return
+    if (needsTurnstile && !TURNSTILE_SITE_KEY) {
+      setNotice({ kind: 'error', message: 'El registro todavía no está disponible. Inténtalo más tarde.' })
+      return
+    }
+    if (needsTurnstile && !turnstileToken) {
+      setNotice({
+        kind: 'error',
+        message: turnstileFailed
+          ? 'No se pudo cargar la verificación de seguridad. Revisa tu conexión y recarga la página.'
+          : 'Espera a que termine la verificación de seguridad e inténtalo de nuevo.',
+      })
+      return
+    }
 
     inFlight.current = true
     setSubmitting(true)
     setNotice(null)
     try {
-      const result = await submitRegistration(values)
-      if (result.status === 'ok') onSuccess()
-      else if (result.status === 'duplicate') setNotice({ kind: 'duplicate', message: DUPLICATE_MESSAGE })
-      else setNotice({ kind: 'error', message: result.message })
+      const result = await submitRegistration(values, {
+        turnstileToken,
+        // Campo trampa: los bots suelen llenarlo; el servidor rechaza el envío si trae algo.
+        honeypot: honeypot.current?.value ?? '',
+        elapsedMs: performance.now() - startedAt.current,
+      })
+      if (result.status === 'ok') {
+        onSuccess()
+        return
+      }
+      if (result.status === 'duplicate') setNotice({ kind: 'duplicate', message: DUPLICATE_MESSAGE })
+      else {
+        if (result.status === 'invalid') setErrors(result.errors)
+        setNotice({ kind: 'error', message: result.message })
+      }
+      // Los tokens de Turnstile son de un solo uso: se solicita uno nuevo para el siguiente intento.
+      if (needsTurnstile) turnstile.current?.reset()
     } catch {
       setNotice({
         kind: 'error',
@@ -115,8 +145,8 @@ export function RegistrationForm({ onSuccess }: { onSuccess: () => void }) {
 
       {/* Campo trampa anti-spam (oculto para personas y lectores de pantalla) */}
       <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-        <label htmlFor="campo-empresa">Empresa</label>
-        <input ref={honeypot} id="campo-empresa" name="empresa" type="text" tabIndex={-1} autoComplete="off" />
+        <label htmlFor="campo-hp">Deja este campo vacío</label>
+        <input ref={honeypot} id="campo-hp" name="hp_no_llenar" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       <div className="rounded-2xl bg-rincel-light-blue/60 p-4 text-sm font-semibold leading-relaxed text-rincel-dark">
@@ -160,6 +190,18 @@ export function RegistrationForm({ onSuccess }: { onSuccess: () => void }) {
       >
         Deseo recibir promociones y novedades de Rincel por WhatsApp o SMS
       </CheckboxField>
+
+      {needsTurnstile && TURNSTILE_SITE_KEY && (
+        <Turnstile
+          ref={turnstile}
+          siteKey={TURNSTILE_SITE_KEY}
+          onToken={(token) => {
+            setTurnstileToken(token)
+            if (token) setTurnstileFailed(false)
+          }}
+          onError={() => setTurnstileFailed(true)}
+        />
+      )}
 
       <div aria-live="polite" aria-atomic="true">
         {notice && (

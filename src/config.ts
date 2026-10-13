@@ -17,3 +17,9 @@ export const REGISTRATION_MODE: RegistrationMode =
   import.meta.env.VITE_REGISTRATION_MODE === 'live' ? 'live' : 'demo'
 
 export const IS_DEMO = REGISTRATION_MODE === 'demo'
+
+/** Endpoint del backend (misma origen; funciona igual en pages.dev y en sorteo.rincel.com.mx). */
+export const API_ENDPOINT = '/api/registro'
+
+/** Clave PÚBLICA de Cloudflare Turnstile (no es secreta). Obligatoria en modo "live". */
+export const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
