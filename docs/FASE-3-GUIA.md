@@ -27,7 +27,7 @@ Está en la misma carpeta, es privada (solo el dueño) y tiene la misma estructu
 3. En el **Registro de ejecución** aparece `APPS_SCRIPT_SECRET = …`. Guárdalo en un lugar privado
    (lo necesitaremos en Cloudflare). **No lo envíes por chat ni lo subas a GitHub.**
 
-### A4. Prueba automática
+### A4. Prueba automática ✅ (13/10/2026: 5/5 casos correctos en Google real)
 1. Elige **`pruebaEnCopia`** → **Ejecutar**.
 2. Debe terminar con **`TODAS LAS PRUEBAS PASARON`** y crear la pestaña **Registros Web** en la copia.
 3. Elige **`diagnostico`** → **Ejecutar**. Solo muestra conteos (sin nombres ni teléfonos).
@@ -40,7 +40,10 @@ Está en la misma carpeta, es privada (solo el dueño) y tiene la misma estructu
    no existe ninguna forma de leer datos.)
 3. **Implementar** → copia la **URL de la aplicación web** (termina en `/exec`).
 
-### A6. Prueba de envíos simultáneos (opcional, recomendada)
+### A6. Prueba de envíos simultáneos ✅ (13/10/2026: `created, duplicate, duplicate, duplicate, duplicate`)
+
+Sin Node: pega `scripts/prueba-concurrencia-navegador.js` en la consola del navegador (F12 → Console).
+Con Node:
 Desde tu computadora, con Node 18 o superior, en la carpeta del proyecto:
 
 ```bash
