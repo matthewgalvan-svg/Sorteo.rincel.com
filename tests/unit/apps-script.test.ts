@@ -133,3 +133,14 @@ describe('ayudas de la FASE 3', () => {
     expect(env.secret).toBe(first)
   })
 })
+
+describe('diagnostico', () => {
+  it('no cuenta filas vacías como formato distinto', () => {
+    const env = newEnv()
+    env.sheets[0].rows.push(['', '', '', '', '', ''], ['', '', '', '', '', ''])
+    loadAppsScript(env).run('diagnostico')
+    expect(env.logs[0]).toBe(
+      'Respuestas de formulario 1: 2 registros con teléfono (2 filas vacías), 2 con 10 dígitos, 2 números únicos, 0 con formato distinto.',
+    )
+  })
+})

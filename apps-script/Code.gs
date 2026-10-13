@@ -195,11 +195,13 @@ function diagnostico() {
     if (!sheet) { console.log(name + ': no existe'); return; }
     var last = sheet.getLastRow();
     var phones = last < 2 ? [] : sheet.getRange(2, 3, last - 1, 1).getValues().map(function (r) { return normalizePhone_(r[0]); });
-    var valid = phones.filter(function (p) { return /^\d{10}$/.test(p); });
+    var filled = phones.filter(function (p) { return p !== ''; });
+    var valid = filled.filter(function (p) { return /^\d{10}$/.test(p); });
     var unique = {};
     valid.forEach(function (p) { unique[p] = true; });
-    console.log(name + ': ' + phones.length + ' filas, ' + valid.length + ' con 10 dígitos, ' +
-      Object.keys(unique).length + ' números únicos, ' + (phones.length - valid.length) + ' con formato distinto.');
+    console.log(name + ': ' + filled.length + ' registros con teléfono (' + (phones.length - filled.length) +
+      ' filas vacías), ' + valid.length + ' con 10 dígitos, ' + Object.keys(unique).length + ' números únicos, ' +
+      (filled.length - valid.length) + ' con formato distinto.');
   });
 }
 
