@@ -30,6 +30,7 @@ export class FakeSheet {
         Array.from({ length: numRows }, (_, i) =>
           Array.from({ length: numCols }, (_, j) => sheet.rows[row - 1 + i]?.[col - 1 + j] ?? ''),
         ),
+      getValue: () => sheet.rows[row - 1]?.[col - 1] ?? '',
       setValues: (values: Cell[][]) => {
         sheet.writes++
         values.forEach((v, i) => {
@@ -55,11 +56,14 @@ export interface FakeEnv {
   lockAvailable: boolean
   insertedSheets: string[]
   lockReleased: number
+  fileName: string
+  logs: string[]
 }
 
 export function loadAppsScript(env: FakeEnv) {
   const code = readFileSync(fileURLToPath(new URL('../../apps-script/Code.gs', import.meta.url)), 'utf8')
   const spreadsheet = {
+    getName: () => env.fileName,
     getSheetByName: (name: string) => env.sheets.find((s) => s.name === name) ?? null,
     getSheets: () => env.sheets,
     insertSheet: (name: string) => {
@@ -71,7 +75,7 @@ export function loadAppsScript(env: FakeEnv) {
   }
   const toSigned = (buf: Buffer) => Array.from(buf).map((b) => (b > 127 ? b - 256 : b))
   const context = vm.createContext({
-    console: { log: () => {}, error: () => {} },
+    console: { log: (m: string) => env.logs.push(m), error: () => {} },
     SpreadsheetApp: { getActiveSpreadsheet: () => spreadsheet, flush: () => {} },
     LockService: {
       getScriptLock: () => ({
@@ -82,7 +86,12 @@ export function loadAppsScript(env: FakeEnv) {
       }),
     },
     PropertiesService: {
-      getScriptProperties: () => ({ getProperty: (k: string) => (k === 'SHARED_SECRET' ? env.secret : null) }),
+      getScriptProperties: () => ({
+        getProperty: (k: string) => (k === 'SHARED_SECRET' ? env.secret : null),
+        setProperty: (k: string, v: string) => {
+          if (k === 'SHARED_SECRET') env.secret = v
+        },
+      }),
     },
     Utilities: {
       getUuid: () => randomUUID(),
@@ -106,6 +115,7 @@ export function loadAppsScript(env: FakeEnv) {
     },
     doGet: () => JSON.parse((call('doGet') as { content: string }).content),
     setup: () => call('setupRegistrosWeb'),
+    run: (fn: string) => call(fn),
   }
 }
 
@@ -138,6 +148,8 @@ export function newEnv(overrides: Partial<FakeEnv> = {}): FakeEnv {
     lockAvailable: true,
     insertedSheets: [],
     lockReleased: 0,
+    fileName: 'RINCEL | REGISTRO SORTEO INAUGURACIÓN 2026',
+    logs: [],
     ...overrides,
   }
 }

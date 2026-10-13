@@ -202,3 +202,59 @@ function diagnostico() {
       Object.keys(unique).length + ' números únicos, ' + (phones.length - valid.length) + ' con formato distinto.');
   });
 }
+
+/**
+ * EJECUTAR UNA VEZ (FASE 3): genera el secreto compartido si no existe y lo muestra en el registro
+ * de ejecución (solo visible para el dueño del script). Cópialo a Cloudflare como APPS_SCRIPT_SECRET.
+ */
+function generarSecreto() {
+  var props = PropertiesService.getScriptProperties();
+  var secret = props.getProperty('SHARED_SECRET');
+  if (!secret) {
+    secret = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
+    props.setProperty('SHARED_SECRET', secret);
+    console.log('Secreto creado.');
+  } else {
+    console.log('El secreto ya existía; no se cambió.');
+  }
+  console.log('APPS_SCRIPT_SECRET = ' + secret);
+}
+
+/**
+ * PRUEBA SOLO PARA LA COPIA DE LA HOJA (FASE 3). Se niega a correr si el nombre del archivo no contiene «Copia».
+ * Usa números ficticios 5500000xxx y deja las filas de prueba en «Registros Web» de la copia.
+ */
+function pruebaEnCopia() {
+  var ss = getSpreadsheet_();
+  if (!/copia/i.test(ss.getName())) {
+    throw new Error('Esta prueba solo puede correr en una COPIA de la hoja (el nombre debe contener «Copia»).');
+  }
+  if (!ss.getSheetByName(WEB_SHEET_NAME)) setupRegistrosWeb();
+
+  var tel = '5500000' + ('00' + Math.floor(Math.random() * 1000)).slice(-3);
+  var casos = [
+    ['Registro nuevo', { nombre: 'Persona Ficticia Prueba', telefono: tel, aceptaBases: true, aceptaPromociones: false }, 'created'],
+    ['Mismo número', { nombre: 'Otra Persona Ficticia', telefono: tel, aceptaBases: true, aceptaPromociones: true }, 'duplicate'],
+    ['Mismo número con espacios y +52', { nombre: 'Otra Persona Ficticia', telefono: '+52 ' + tel.slice(0, 2) + ' ' + tel.slice(2, 6) + ' ' + tel.slice(6), aceptaBases: true, aceptaPromociones: true }, 'duplicate'],
+    ['Teléfono incompleto', { nombre: 'Persona Ficticia', telefono: '55000', aceptaBases: true, aceptaPromociones: false }, 'invalid'],
+    ['Sin aceptar bases', { nombre: 'Persona Ficticia', telefono: '5500000999', aceptaBases: false, aceptaPromociones: false }, 'invalid']
+  ];
+
+  var form = ss.getSheetByName(FORM_SHEET_NAME);
+  if (form && form.getLastRow() >= 2) {
+    var historico = normalizePhone_(form.getRange(2, FORM_PHONE_COLUMN).getValue());
+    if (/^\d{10}$/.test(historico)) {
+      casos.push(['Número que ya está en el Google Form', { nombre: 'Persona Ficticia', telefono: historico, aceptaBases: true, aceptaPromociones: false }, 'duplicate']);
+    }
+  }
+
+  var fallas = 0;
+  casos.forEach(function (c) {
+    var data = sanitize_(c[1]);
+    var code = data ? registerWithLock_(data).code : 'invalid';
+    var ok = code === c[2];
+    if (!ok) fallas++;
+    console.log((ok ? '✅ ' : '❌ ') + c[0] + ': esperado «' + c[2] + '», obtenido «' + code + '»');
+  });
+  console.log(fallas === 0 ? 'TODAS LAS PRUEBAS PASARON' : fallas + ' PRUEBA(S) FALLARON');
+}

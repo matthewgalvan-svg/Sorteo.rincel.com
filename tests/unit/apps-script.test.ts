@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FakeSheet, SECRET, WEB_HEADERS, loadAppsScript, newEnv } from './fakeAppsScript'
+import { FakeSheet, SECRET, WEB_HEADERS, formSheet, loadAppsScript, newEnv } from './fakeAppsScript'
 
 const valid = { secret: SECRET, nombre: 'Persona De Prueba', telefono: '5500000099', aceptaBases: true, aceptaPromociones: false }
 
@@ -104,5 +104,32 @@ describe('setupRegistrosWeb', () => {
     expect(env.sheets[1].rows[0]).toEqual(WEB_HEADERS)
     gas.setup()
     expect(env.insertedSheets).toEqual(['Registros Web'])
+  })
+})
+
+describe('ayudas de la FASE 3', () => {
+  it('pruebaEnCopia se niega a correr en la hoja original', () => {
+    const env = newEnv()
+    expect(() => loadAppsScript(env).run('pruebaEnCopia')).toThrow(/COPIA/)
+    expect(env.sheets[1].rows).toHaveLength(1)
+  })
+
+  it('pruebaEnCopia pasa todos sus casos en una copia (incluido un número del Google Form)', () => {
+    const env = newEnv({ fileName: 'Copia de RINCEL | REGISTRO SORTEO INAUGURACIÓN 2026', sheets: [formSheet()] })
+    loadAppsScript(env).run('pruebaEnCopia')
+    expect(env.logs.filter((l) => l.startsWith('❌'))).toEqual([])
+    expect(env.logs).toContain('TODAS LAS PRUEBAS PASARON')
+    expect(env.logs.some((l) => l.includes('Google Form'))).toBe(true)
+    expect(env.sheets.find((s) => s.name === 'Registros Web')!.rows).toHaveLength(2)
+  })
+
+  it('generarSecreto crea un secreto largo una sola vez', () => {
+    const env = newEnv({ secret: null })
+    const gas = loadAppsScript(env)
+    gas.run('generarSecreto')
+    const first = env.secret
+    expect(first).toMatch(/^[0-9a-f]{64}$/)
+    gas.run('generarSecreto')
+    expect(env.secret).toBe(first)
   })
 })
