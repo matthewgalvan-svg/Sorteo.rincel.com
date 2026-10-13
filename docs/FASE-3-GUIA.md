@@ -7,12 +7,10 @@ Ningún paso publica la página ni abre el registro al público.
 
 ## Parte A — Copia de prueba
 
-### A1. Hacer la copia
-1. Abre la hoja original → **Archivo → Hacer una copia**.
-2. Deja el nombre que propone Google (**«Copia de RINCEL | REGISTRO…»**). La palabra «Copia» es importante:
-   la función de prueba se niega a correr en cualquier archivo que no la tenga.
-3. Si Google también crea una copia del formulario («Copia de …»), puedes borrar **esa copia** del formulario.
-   No toques el formulario original.
+### A1. Copia ✅ (hecha)
+Copia creada: **«Copia de PRUEBA - RINCEL | REGISTRO SORTEO INAUGURACIÓN 2026»**
+(https://docs.google.com/spreadsheets/d/1KeFOC-yDz2QlzZQRxG9nGxTONoZubAMlvB6KETM0HNg/edit).
+Está en la misma carpeta, es privada (solo el dueño) y tiene la misma estructura que el original.
 
 ### A2. Instalar el script en la copia
 1. En la **copia**: **Extensiones → Apps Script**.
@@ -56,15 +54,10 @@ Cuando termines, puedes borrar la copia completa.
 
 ---
 
-## Parte B — Borrar los datos de prueba del archivo original (autorizado)
+## Parte B — Datos de prueba del archivo original ✅
 
-Hazlo **después** de la Parte A (así la copia conserva filas para probar duplicados).
-
-1. En el archivo **original**, pestaña **Respuestas de formulario 1**.
-2. Selecciona desde la **fila 2** hasta la última fila con datos (haz clic en el número 2, luego Mayús + clic en el último).
-3. Clic derecho → **Eliminar filas**. **No borres la fila 1** (encabezados) ni la pestaña.
-4. Opcional, para limpiar también el resumen del formulario: en **Google Forms → Respuestas → ⋮ →
-   Eliminar todas las respuestas**.
+Revisado el 13/10/2026: «Respuestas de formulario 1» ya solo tiene la fila de encabezados. No hay nada que borrar.
+Opcional: en **Google Forms → Respuestas → ⋮ → Eliminar todas las respuestas** para limpiar también el resumen del formulario.
 
 ---
 

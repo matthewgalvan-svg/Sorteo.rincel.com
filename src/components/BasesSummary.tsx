@@ -1,17 +1,18 @@
 import { LINKS } from '../config'
 import { Section } from './Section'
 
+// Resumen fiel de «RINCEL | BASES Y CONDICIONES DEL SORTEO DE INAUGURACIÓN» (bases provisionales).
 const bases = [
-  'La participación es gratuita.',
-  'Solo se permite una participación por persona.',
-  'El registro se realiza con nombre y número telefónico.',
-  'Los registros duplicados no generan participaciones adicionales.',
-  'Es necesario estar presente durante la selección de ganadores.',
-  'Los ganadores se anunciarán durante la inauguración.',
-  'Para recibir el premio se deberá presentar identificación oficial.',
-  'El procedimiento de suplentes se dará a conocer en las bases definitivas.',
-  'Se sortearán tres celulares; los modelos se anunciarán posteriormente.',
-  'Los datos se tratarán conforme al aviso de privacidad.',
+  'La participación es completamente gratuita y no requiere realizar ninguna compra.',
+  'Cada persona podrá participar una sola vez, utilizando un número telefónico de contacto.',
+  'Para participar, es necesario registrar nombre completo y número de celular en el formulario oficial de Rincel.',
+  'Los registros duplicados no otorgan participaciones adicionales.',
+  'Los participantes deberán encontrarse físicamente en la sucursal durante la selección de ganadores.',
+  'Los ganadores se anunciarán durante el evento de inauguración y se les llamará al número registrado.',
+  'Para recibir el premio se deberá presentar una identificación oficial vigente que coincida con el nombre registrado.',
+  'Si un ganador no está presente o no cumple los requisitos, se aplicará el procedimiento de suplentes de las bases definitivas.',
+  'Los premios son tres teléfonos celulares; los modelos se anunciarán antes del inicio de la promoción.',
+  'Los datos personales serán tratados conforme al aviso de privacidad de Rincel.',
 ]
 
 export function BasesSummary() {

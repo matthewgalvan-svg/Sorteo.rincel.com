@@ -153,11 +153,13 @@ export function RegistrationForm({ onSuccess }: { onSuccess: () => void }) {
         <p className="mb-1 flex items-center gap-2 font-black text-rincel-blue">
           <span aria-hidden="true">🔒</span> Aviso de privacidad
         </p>
-        Solo te pedimos nombre y número celular. Rincel tratará tus datos conforme a su{' '}
+        Tus datos personales serán tratados por Marketing 358, S.A. de C.V., responsable de Rincel, para administrar
+        tu participación en el sorteo de inauguración, identificar registros duplicados, contactar a los ganadores y
+        gestionar la entrega de premios. Consulta el{' '}
         <a href={LINKS.privacidad} target="_blank" rel="noopener noreferrer" className={linkClass}>
           Aviso de privacidad
         </a>
-        . Este registro no solicita INE, CURP, dirección ni correo electrónico.
+        . Solo pedimos nombre y número celular.
       </div>
 
       <CheckboxField
